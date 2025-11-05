@@ -1,5 +1,5 @@
 ARG BUILD_ARCH=amd64
-FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-python:3.11
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base:3.19
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
