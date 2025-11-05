@@ -4,11 +4,16 @@ FROM ghcr.io/home-assistant/${BUILD_ARCH}-base:3.19
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apk add --no-cache \
+    python3 \
+    py3-pip \
     bash \
     curl \
     unzip \
     jq \
     ca-certificates
+
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
@@ -18,6 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app /app/app
 COPY run.sh /app/run.sh
 
-RUN chmod +x /app/run.sh
+COPY rootfs/ /
 
-CMD ["/app/run.sh"]
+RUN chmod +x /app/run.sh \
+    && chmod +x /etc/s6-overlay/s6-rc.d/homecore-tools/run
+
+CMD ["/init"]
