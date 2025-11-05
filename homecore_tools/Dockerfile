@@ -12,11 +12,13 @@ RUN apk add --no-cache \
     jq \
     ca-certificates
 
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 WORKDIR /app
 
 COPY requirements.txt ./
-RUN python3 -m ensurepip --upgrade \
- && pip3 install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app /app/app
 COPY run.sh /app/run.sh
