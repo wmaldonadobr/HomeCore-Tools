@@ -22,8 +22,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app /app/app
 COPY run.sh /app/run.sh
+
+# Copia a estrutura de serviços s6 corretamente
 COPY rootfs/ /
 
-RUN chmod +x /app/run.sh /etc/services.d/homecore-tools/run
+# Permissões do serviço s6 + script inicial
+RUN chmod +x /app/run.sh \
+    && chmod +x /etc/services.d/homecore-tools/run
 
+# Deixa o s6 ser o PID 1
 CMD ["/init"]

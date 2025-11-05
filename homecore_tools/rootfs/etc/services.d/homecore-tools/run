@@ -1,4 +1,5 @@
-#!/command/with-contenv bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-exec /app/run.sh
+cd /app
+exec python -m app.main
