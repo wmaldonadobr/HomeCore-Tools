@@ -1,7 +1,7 @@
 {
   "name": "HomeCore Tools",
   "slug": "homecore_tools",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Executa updates HomeCore sob demanda",
   "arch": ["amd64", "armv7", "aarch64"],
   "startup": "services",
