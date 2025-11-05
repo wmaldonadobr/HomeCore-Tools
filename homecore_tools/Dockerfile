@@ -1,9 +1,11 @@
 ARG BUILD_ARCH=amd64
-FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-python:3.11
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base:3.19
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apk add --no-cache \
+    python3 \
+    py3-pip \
     bash \
     curl \
     unzip \
@@ -13,7 +15,8 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python3 -m ensurepip --upgrade \
+ && pip3 install --no-cache-dir -r requirements.txt
 
 COPY app /app/app
 COPY run.sh /app/run.sh
