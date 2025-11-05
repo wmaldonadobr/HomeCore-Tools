@@ -1,13 +1,14 @@
 {
   "name": "HomeCore Tools",
   "slug": "homecore_tools",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Executa updates HomeCore sob demanda",
   "arch": ["amd64", "armv7", "aarch64"],
-  "startup": "services",
+  "startup": "application",
   "boot": "auto",
   "ports": {"8125/tcp": 8125},
   "map": ["config:rw", "ssl:rw"],
+  "watchdog": "http://[HOST]:8125/health",
   "options": {
     "api_base_url": "https://homecore.com.br/api/sync/beacon.php",
     "core_base_url": "https://homecore.com.br/api/update/core",
