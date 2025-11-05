@@ -22,7 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY app /app/app
 COPY run.sh /app/run.sh
+COPY rootfs/ /
 
-RUN chmod +x /app/run.sh
+RUN chmod +x /app/run.sh /etc/services.d/homecore-tools/run
 
-CMD ["/app/run.sh"]
+CMD ["/init"]
