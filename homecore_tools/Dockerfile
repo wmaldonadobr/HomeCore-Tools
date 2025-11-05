@@ -1,19 +1,14 @@
 ARG BUILD_ARCH=amd64
-FROM ghcr.io/home-assistant/${BUILD_ARCH}-base:3.19
+FROM ghcr.io/home-assistant/${BUILD_ARCH}-base-python:3.11
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 RUN apk add --no-cache \
-    python3 \
-    py3-pip \
     bash \
     curl \
     unzip \
     jq \
     ca-certificates
-
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /app
 
@@ -23,12 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app /app/app
 COPY run.sh /app/run.sh
 
-# Copia serviços S6
-COPY rootfs/ /
+RUN chmod +x /app/run.sh
 
-# Permissões
-RUN chmod +x /app/run.sh \
-    && chmod +x /etc/services.d/homecore-tools/run
-
-# Mantém S6 como PID 1
-CMD ["/init"]
+CMD ["/app/run.sh"]
