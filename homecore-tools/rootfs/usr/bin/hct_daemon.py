@@ -51,7 +51,7 @@ class HCTDaemon:
         self.running = False
     
     def get_homecore_token(self) -> Optional[str]:
-        """Obtém token da integração HomeCore via Supervisor API."""
+        """Obtém token da integração HomeCore via API HTTP."""
         if not self.supervisor_token:
             logger.error("hct-daemon", "get_token", "SUPERVISOR_TOKEN não disponível")
             return None
@@ -59,29 +59,35 @@ class HCTDaemon:
         logger.info("hct-daemon", "get_token", "Obtendo token da integração HomeCore")
         
         try:
-            url = "http://supervisor/core/api/config_entries"
+            # Usar novo endpoint HTTP da integração
+            url = "http://homeassistant:8123/api/homecore/token"
             request = Request(url)
-            request.add_header('Authorization', f'Bearer {self.supervisor_token}')
             request.add_header('Content-Type', 'application/json')
             
-            with urlopen(request, timeout=30) as response:
+            with urlopen(request, timeout=10) as response:
                 if response.status == 200:
-                    entries = json.loads(response.read().decode('utf-8'))
+                    data = json.loads(response.read().decode('utf-8'))
+                    token = data.get('token')
                     
-                    # Procurar integração homecore
-                    for entry in entries:
-                        if entry.get('domain') == 'homecore':
-                            token = entry.get('data', {}).get('token')
-                            if token:
-                                logger.success("hct-daemon", "get_token", "Token obtido com sucesso")
-                                return token
-                    
-                    logger.warning("hct-daemon", "get_token", "Integração HomeCore não encontrada")
-                    return None
+                    if token:
+                        logger.success("hct-daemon", "get_token", "Token obtido com sucesso via API HTTP")
+                        # Logar informações adicionais (sem expor token)
+                        logger.debug("hct-daemon", "get_token", f"API URL: {data.get('api_url')}")
+                        logger.debug("hct-daemon", "get_token", f"Sync interval: {data.get('sync_interval')}s")
+                        return token
+                    else:
+                        logger.error("hct-daemon", "get_token", "Token não encontrado na resposta da API")
+                        return None
                 else:
                     logger.error("hct-daemon", "get_token", f"HTTP {response.status}")
                     return None
         
+        except URLError as e:
+            if hasattr(e, 'code') and e.code == 404:
+                logger.error("hct-daemon", "get_token", "Integração HomeCore não instalada ou não configurada")
+            else:
+                logger.error("hct-daemon", "get_token", "Erro de rede ao obter token", exception=e)
+            return None
         except Exception as e:
             logger.error("hct-daemon", "get_token", "Erro ao obter token", exception=e)
             return None

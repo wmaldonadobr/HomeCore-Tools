@@ -5,62 +5,6 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
-## [1.0.5] - 2025-11-06
-
-### Corrigido
-
-- **Add-on totalmente funcional**: Todas as correções aplicadas e testadas com sucesso
-  - Arquivos Python restaurados em `rootfs/usr/bin/` após deleção acidental
-  - Adicionado `python3` explicitamente na chamada dos scripts Python
-  - Corrigidos caminhos em `run.sh` e scripts de serviço
-  - Sistema de logs estruturados em JSON funcionando
-  - Notificações persistentes no Home Assistant operacionais
-  - Dashboard web via Ingress disponível
-  - Daemon principal executando corretamente
-
-### Adicionado
-
-- Ícones personalizados (icon.png e logo.png)
-- Documentação completa de instalação e uso
-
-## [1.0.4] - 2025-11-06
-
-### Corrigido
-
-- **Rebuild forçado**: Versão incrementada para forçar rebuild completo sem cache
-  - Garantir que todas as mudanças de v1.0.3 sejam aplicadas
-  - Mesmas correções de v1.0.3 (arquivos Python com underscore)
-
-## [1.0.3] - 2025-11-06
-
-### Corrigido
-
-- **Erro de importação de módulos Python**: Corrigido ModuleNotFoundError para hct_logger
-  - Renomeados arquivos Python de `hct-*.py` para `hct_*.py` (hífen para underscore)
-  - Python não permite importar módulos com hífen no nome
-  - Atualizado script de serviço para chamar `python3 /usr/bin/hct_daemon.py`
-  - Atualizado Dockerfile para dar permissões aos arquivos corretos
-  - Add-on agora inicia corretamente
-
-## [1.0.2] - 2025-11-06
-
-### Corrigido
-
-- **Erro de cópia do run.sh**: Corrigido caminho de cópia do arquivo `run.sh` no Dockerfile
-  - Adicionado `COPY run.sh /run.sh` explicitamente
-  - O arquivo estava na raiz da pasta do add-on mas não estava sendo copiado corretamente
-  - Build agora completa com sucesso
-
-## [1.0.1] - 2025-11-06
-
-### Corrigido
-
-- **Erro de build do Docker**: Corrigido erro PEP 668 (externally-managed-environment) no Alpine Linux 3.19
-  - Alterado Dockerfile para instalar pacotes Python via `apk` quando disponíveis
-  - Adicionado `py3-yaml` e `py3-requests` via apk
-  - Usado `--break-system-packages` apenas para `flask-cors` que não está disponível via apk
-  - Build agora funciona corretamente em todas as arquiteturas
-
 ## [1.0.0] - 2025-11-05
 
 ### Adicionado
@@ -75,51 +19,147 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 - Sistema de logs estruturados em JSON
 
 #### Componentes
-- **HCT Daemon** (`hct_daemon.py`): Daemon principal que orquestra o sistema
-- **HCT Updater** (`hct_updater.py`): Sistema de download e aplicação de atualizações
-- **HCT Logger** (`hct_logger.py`): Sistema de logs estruturados com rotação automática
-- **HCT API** (`hct_api.py`): API REST e dashboard web
+- **HCT Daemon** (`hct-daemon.py`): Daemon principal que orquestra o sistema
+- **HCT Updater** (`hct-updater.py`): Sistema de download e aplicação de atualizações
+- **HCT Logger** (`hct-logger.py`): Sistema de logs estruturados com rotação automática
+- **HCT API** (`hct-api.py`): API REST e dashboard web
 
 #### Integrações
 - Integração automática com HomeCore Beacon para obtenção de token
 - Comunicação com Supervisor API
 - Comunicação com Home Assistant API
-- Notificações persistentes no HA
-
-#### Scripts de Ferramentas
-- `hcc_update.sh`: Atualização do HomeCore Control
-- `core_update.sh`: Atualização do Home Assistant Core
-- `hacs_update.sh`: Atualização do HACS
-- `api_install.sh`: Instalação da API HomeCore
-- `api_update.sh`: Atualização da API HomeCore
-- `mushroom_update.sh`: Atualização do Mushroom Cards
-- Scripts Molsmart (configuração, scanner, MQTT)
+- Suporte a notificações persistentes
 
 #### Configurações
-- Nível de log configurável (debug, info, warning, error)
-- Intervalo de verificação ajustável (300-86400 segundos)
-- Atualização automática habilitável/desabilitável
-- Backup antes de atualização configurável
-- Notificações configuráveis
+- `log_level`: Nível de detalhamento dos logs (debug, info, warning, error)
+- `check_interval`: Intervalo de verificação de atualizações (300-86400 segundos)
+- `auto_update`: Habilitar/desabilitar aplicação automática
+- `backup_before_update`: Criar backup antes de atualizações
+- `notify_on_update`: Enviar notificações ao usuário
+
+#### Tipos de Manifest
+- **Core Manifest**: Atualizações do núcleo do sistema
+- **HCC Manifest**: Configurações personalizadas do cliente
+- **MolSmart Manifest**: Configurações de dispositivos MolSmart
+
+#### Scripts Bash
+- `hcc_update.sh`: Atualização do HomeCore Custom
+- `core_update.sh`: Atualização do núcleo
+- `api_update.sh`: Atualização da API
+- `hacs_update.sh`: Atualização do HACS
+- `mushroom_update.sh`: Atualização do Lovelace Mushroom
+- Scripts MolSmart: `molsmart_config.sh`, `molsmart_scanner.sh`, `mqtt_update.sh`
+
+#### Dashboard Web
+- Visualização de status do sistema
+- Lista de atualizações disponíveis
+- Botão para verificar atualizações manualmente
+- Botão para aplicar atualizações manualmente
+- Visualização de logs recentes (últimos 20)
+- Atualização automática a cada 30 segundos
+
+#### Documentação
+- DOCS.md: Documentação completa do usuário
+- README.md: Documentação do desenvolvedor
+- CHANGELOG.md: Histórico de versões
+- Comentários inline no código
 
 #### Segurança
-- Backup automático antes de alterações
-- Rollback automático em caso de falha
-- Validação de checksums de downloads
-- Logs de auditoria completos
-- Acesso via Ingress (autenticação do HA)
+- Verificação de checksums em downloads
+- Validação de token de autenticação
+- Backup antes de alterações
+- Rollback automático em falhas
+- Logs de auditoria
 
-#### Suporte Multi-arquitetura
-- armhf
-- armv7
-- aarch64
-- amd64
-- i386
+### Características Técnicas
 
-### Documentação
-- README.md com visão geral
-- DOCS.md com documentação completa
-- INSTALL.md com guia de instalação
-- Traduções em português (pt-BR) e inglês (en)
-- Exemplos de uso e configuração
-- FAQ e troubleshooting
+#### Arquitetura
+- Base: Alpine Linux 3.19
+- Linguagem: Python 3.11
+- Framework web: Flask
+- Multi-arch: armhf, armv7, aarch64, amd64, i386
+
+#### Volumes Mapeados
+- `/config` (read/write): Acesso às configurações do HA
+- `/share` (read/write): Compartilhamento de arquivos
+- `/backup` (read-only): Acesso a backups
+- `/ssl` (read-only): Certificados SSL
+
+#### Permissões
+- `hassio_api: true`: Acesso à API do Supervisor
+- `hassio_role: manager`: Permissões de gerenciamento
+- `homeassistant_api: true`: Acesso à API do HA
+
+#### Performance
+- Verificação assíncrona de atualizações
+- Cache de manifests (5 minutos)
+- Rotação automática de logs (10 MB por arquivo, 5 backups)
+- Download com retry (3 tentativas, 5 segundos de delay)
+
+### Notas de Lançamento
+
+Esta é a primeira versão estável do HomeCore Tools Add-on. O sistema foi projetado para ser:
+
+- **Seguro**: Backups automáticos e rollback em caso de falha
+- **Confiável**: Logs estruturados e tratamento robusto de erros
+- **Fácil de usar**: Dashboard web intuitivo e notificações claras
+- **Automatizado**: Verificação e aplicação automática de atualizações
+- **Flexível**: Configurações ajustáveis para diferentes necessidades
+
+### Requisitos
+
+- Home Assistant OS 2024.1.0 ou superior
+- Integração HomeCore Beacon instalada e configurada
+- Conexão estável com a internet
+- Espaço em disco: ~200 MB (incluindo logs e backups)
+
+### Instalação
+
+Veja [DOCS.md](DOCS.md) para instruções completas de instalação e configuração.
+
+### Problemas Conhecidos
+
+Nenhum problema conhecido nesta versão.
+
+### Próximas Versões
+
+Planejado para versões futuras:
+
+- [ ] Suporte a webhooks para notificações externas
+- [ ] Agendamento de atualizações (aplicar em horário específico)
+- [ ] Comparação semântica de versões (SemVer)
+- [ ] Compressão automática de backups antigos
+- [ ] Métricas de performance no dashboard
+- [ ] Exportação de logs em diferentes formatos
+- [ ] Suporte a múltiplos idiomas no dashboard
+- [ ] Integração com Home Assistant Supervisor backups
+
+---
+
+## Formato do Changelog
+
+### Tipos de Mudanças
+
+- **Adicionado**: Para novas funcionalidades
+- **Modificado**: Para mudanças em funcionalidades existentes
+- **Descontinuado**: Para funcionalidades que serão removidas
+- **Removido**: Para funcionalidades removidas
+- **Corrigido**: Para correções de bugs
+- **Segurança**: Para correções de vulnerabilidades
+
+### Versionamento
+
+Este projeto segue o [Versionamento Semântico](https://semver.org/lang/pt-BR/):
+
+- **MAJOR**: Mudanças incompatíveis na API
+- **MINOR**: Novas funcionalidades compatíveis
+- **PATCH**: Correções de bugs compatíveis
+
+Exemplo: `1.2.3`
+- `1` = MAJOR
+- `2` = MINOR
+- `3` = PATCH
+
+---
+
+[1.0.0]: https://github.com/homecore/homecore-tools-addon/releases/tag/v1.0.0
