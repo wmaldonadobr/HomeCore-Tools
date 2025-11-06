@@ -6,6 +6,7 @@ Gerenciamento de logs estruturados em JSON com rotação automática
 
 import os
 import json
+import sys
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -35,7 +36,7 @@ class HCTLogger:
         self.logger.addHandler(json_handler)
         
         # Handler para console (compatível com HA)
-        console_handler = logging.StreamHandler()
+        console_handler = logging.StreamHandler(sys.stderr)
         console_handler.setFormatter(
             logging.Formatter('[%(levelname)s] %(message)s')
         )
