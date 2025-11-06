@@ -1,0 +1,60 @@
+name: "HomeCore Tools"
+version: "1.0.0"
+slug: homecore-tools
+description: "Ferramentas de manutenção e atualização automática para sistemas HomeCore"
+url: "https://homecore.com.br/docs/addon"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: services
+boot: auto
+init: false
+
+# Acesso à API do Supervisor e Home Assistant
+hassio_api: true
+hassio_role: manager
+homeassistant_api: true
+
+# Mapeamento de volumes - CRÍTICO para acesso ao /config
+map:
+  - type: homeassistant_config
+    read_only: false  # Precisa escrever em configuration.yaml e outros
+  - type: share
+    read_only: false
+  - type: backup
+    read_only: true
+  - type: ssl
+    read_only: true
+
+# Opções de configuração do usuário
+options:
+  log_level: info
+  check_interval: 3600
+  auto_update: true
+  backup_before_update: true
+  notify_on_update: true
+
+# Schema de validação das opções
+schema:
+  log_level: list(debug|info|warning|error)
+  check_interval: int(300,86400)
+  auto_update: bool
+  backup_before_update: bool
+  notify_on_update: bool
+
+# Interface web (dashboard de status)
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:tools
+panel_title: "HomeCore Tools"
+panel_admin: true
+
+# Variáveis de ambiente
+environment:
+  PYTHONUNBUFFERED: "1"
+  HCT_CONFIG_DIR: "/config"
+  HCT_DATA_DIR: "/data"
+  HCT_SHARE_DIR: "/share"

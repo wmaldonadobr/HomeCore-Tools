@@ -1,0 +1,16 @@
+configuration:
+  log_level:
+    name: Log Level
+    description: System log verbosity level
+  check_interval:
+    name: Check Interval
+    description: Interval in seconds between update checks (300-86400)
+  auto_update:
+    name: Auto Update
+    description: Automatically apply updates when available
+  backup_before_update:
+    name: Backup Before Update
+    description: Create automatic backup before applying updates
+  notify_on_update:
+    name: Notify on Update
+    description: Send persistent notifications about updates

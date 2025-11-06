@@ -1,102 +1,113 @@
-# HomeCore Tools Add-on
+# HomeCore Add-ons Repository
 
-Add-on HomeCore Tools centraliza os fluxos de atualização da plataforma HomeCore em um único serviço HTTP.  
-Ele roda dentro do Home Assistant Supervisor, com acesso controlado ao `/config`, `/ssl` e `/data`.
+[![GitHub Release](https://img.shields.io/github/release/homecore/homecore-tools-addon.svg?style=flat-square)](https://github.com/homecore/homecore-tools-addon/releases)
+[![License](https://img.shields.io/github/license/homecore/homecore-tools-addon.svg?style=flat-square)](LICENSE)
 
-## Recursos
-- API interna para solicitar atualizações do HomeCore (`api`, `core`, `hcc`).
-- Downloads com retries, validação opcional de checksum e criação automática de backups.
-- Registro de logs estruturados em `/data/logs` e status da última execução em `/data/status.json`.
-- Endpoint de saúde (`/health`) para integrações de monitoramento.
+Repositório oficial de add-ons HomeCore para Home Assistant.
+
+## Sobre
+
+Este repositório contém add-ons desenvolvidos pela equipe HomeCore para facilitar a integração, manutenção e monitoramento de sistemas HomeCore no Home Assistant.
+
+## Add-ons Disponíveis
+
+### HomeCore Tools
+
+Ferramentas de manutenção e atualização automática para sistemas HomeCore.
+
+**Funcionalidades:**
+- ✅ Verificação automática de atualizações via manifests
+- ✅ Aplicação automática de atualizações (configurável)
+- ✅ Backup automático antes de cada atualização
+- ✅ Rollback automático em caso de falha
+- ✅ Dashboard web para monitoramento
+- ✅ Logs estruturados
+- ✅ Notificações persistentes
+
+[📖 Documentação Completa](homecore-tools/DOCS.md) | [📋 Changelog](homecore-tools/CHANGELOG.md)
 
 ## Instalação
-1. Adicione o repositório do add-on no Home Assistant (Settings → Add-ons → Add-on Store → ••• → Repositories).  
-   `https://github.com/homecore/homecore-tools-addon`
-2. Instale o add-on **HomeCore Tools**.
-3. Configure as opções conforme necessário (ver seção a seguir).
-4. Inicie o add-on e verifique os logs iniciais.
 
-## Configuração (`config.json`)
+### Método 1: Botão Rápido (Recomendado)
 
-| Campo | Descrição | Default |
-| --- | --- | --- |
-| `api_base_url` | Endpoint remoto para atualizar os artefatos `api`. | `https://homecore.com.br/api/sync/beacon.php` |
-| `core_base_url` | Endpoint remoto do pacote `core`. | `https://homecore.com.br/api/update/core` |
-| `hcc_base_url` | Endpoint remoto do pacote `hcc`. | `https://homecore.com.br/api/hcc` |
-| `auth_token` | Token necessário no header `Authorization: Bearer`. Altere antes de habilitar produção. | `change-me` |
-| `log_retention_days` | Dias de retenção dos arquivos de log em `/data/logs`. | `7` |
+Clique no botão abaixo para adicionar o repositório automaticamente:
 
-Os diretórios padrão criados pelo add-on:
-- `/config/homecore/{api,core,hcc}` para aplicação dos artefatos.
-- `/data/backups/{api,core,hcc}` para os artefatos baixados.
-- `/data/logs` para logs individuais por execução.
+[![Open your Home Assistant instance and show the add add-on repository dialog with a specific repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fhomecore%2Fhomecore-tools-addon)
 
-## API HTTP
+### Método 2: Manual
 
-Todos os endpoints (exceto `/health`) exigem `Authorization: Bearer <auth_token>`.
+1. No Home Assistant, vá em **Configurações** > **Add-ons**
+2. Clique no **ícone da loja** no canto superior direito
+3. Clique no menu **⋮** (três pontos) no canto superior direito
+4. Selecione **Repositórios**
+5. Cole a URL abaixo e clique em **Adicionar**:
 
-| Método | Caminho | Descrição |
-| --- | --- | --- |
-| `GET` | `/health` | Retorna `{"status": "ok"}` para verificação de vida. |
-| `POST` | `/update/api` | Dispara atualização da camada API. |
-| `POST` | `/update/core` | Dispara atualização do núcleo. |
-| `POST` | `/update/hcc` | Dispara atualização do HomeCore Controller. |
-| `GET` | `/logs?type=<api|core|hcc>` | Lista logs recentes por tipo. |
-| `GET` | `/status` | Último status registrado de cada componente. |
-
-### Payload de atualização
-
-```json
-{
-  "token": "cliente-xyz",
-  "client_id": "opcional",
-  "force": false
-}
+```
+https://github.com/homecore/homecore-tools-addon
 ```
 
-- `token`: obrigatório (via payload ou arquivo `/config/homecore/client_token`).
-- `force`: define se a versão deve ser reaplicada mesmo se já estiver atualizada.
+6. Encontre **"HomeCore Tools"** na lista de add-ons
+7. Clique em **Instalar**
 
-### Resposta padrão (`UpdateResponse`)
+## Requisitos
 
-```json
-{
-  "status": "ok",
-  "message": "Update api aplicado (versão 1.2.3)",
-  "version": "1.2.3",
-  "log_path": "/data/logs/20250101T120000_api_update.log",
-  "started_at": "2025-01-01T12:00:00Z",
-  "finished_at": "2025-01-01T12:01:07Z",
-  "exit_code": 0
-}
-```
+- Home Assistant OS 2024.1.0 ou superior
+- Integração HomeCore Beacon instalada e configurada
 
-`status` pode ser `ok`, `no_update` ou `error`.
+## Suporte
 
-## Exemplo de Automação (`rest_command`)
+### Documentação
 
-```yaml
-rest_command:
-  homecore_update_api:
-    url: "http://homeassistant.local:8125/update/api"
-    method: POST
-    headers:
-      Authorization: "Bearer !secret homecore_tools_token"
-      Content-Type: "application/json"
-    payload: >
-      {
-        "token": "{{ states('input_text.homecore_client_token') }}",
-        "client_id": "{{ states('sensor.homecore_client_id') }}",
-        "force": {{ 'true' if is_state('input_boolean.homecore_force_update', 'on') else 'false' }}
-      }
-```
+- **Documentação completa**: [DOCS.md](homecore-tools/DOCS.md)
+- **Guia de instalação**: [INSTALL.md](homecore-tools/INSTALL.md)
+- **Changelog**: [CHANGELOG.md](homecore-tools/CHANGELOG.md)
 
-Chame `rest_command.homecore_update_api` a partir de uma automação, script ou do painel de serviços.
+### Contato
+
+- **Email**: suporte@homecore.com.br
+- **Website**: https://homecore.com.br
+- **Issues**: [GitHub Issues](https://github.com/homecore/homecore-tools-addon/issues)
 
 ## Desenvolvimento
-- Aplicação escrita em FastAPI 0.110 rodando via `uvicorn`.
-- Dependências listadas em `requirements.txt`.
-- Execute o servidor localmente com `uvicorn app.main:app --reload --port 8125`.
+
+### Estrutura do Repositório
+
+```
+homecore-tools-addon/
+├── repository.yaml          # Configuração do repositório
+├── README.md                # Este arquivo
+└── homecore-tools/          # Add-on HomeCore Tools
+    ├── config.yaml          # Configuração do add-on
+    ├── Dockerfile           # Imagem Docker
+    ├── icon.png             # Ícone do add-on
+    ├── logo.png             # Logo do add-on
+    ├── DOCS.md              # Documentação do usuário
+    └── ...
+```
+
+### Contribuindo
+
+Contribuições são bem-vindas! Por favor:
+
+1. Fork este repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -am 'Adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
+
+### Reportar Problemas
+
+Encontrou um bug ou tem uma sugestão? [Abra uma issue](https://github.com/homecore/homecore-tools-addon/issues/new).
 
 ## Licença
-Este projeto segue a licença da organização HomeCore. Consulte o responsável pela distribuição para detalhes.
+
+Este projeto é licenciado sob os termos da licença Apache 2.0. Veja [LICENSE](LICENSE) para detalhes.
+
+## Créditos
+
+Desenvolvido com ❤️ pela equipe [HomeCore](https://homecore.com.br)
+
+---
+
+**Versão do Repositório:** 1.0.0  
+**Última Atualização:** 2025-11-05

@@ -1,0 +1,7 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Serviço HCT Daemon (S6 Overlay)
+# ==============================================================================
+
+bashio::log.info "Iniciando serviço HCT Daemon..."
+exec /usr/bin/hct-daemon.py

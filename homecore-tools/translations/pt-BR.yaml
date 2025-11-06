@@ -1,0 +1,16 @@
+configuration:
+  log_level:
+    name: Nível de Log
+    description: Nível de detalhamento dos logs do sistema
+  check_interval:
+    name: Intervalo de Verificação
+    description: Intervalo em segundos entre verificações de atualização (300-86400)
+  auto_update:
+    name: Atualização Automática
+    description: Aplicar automaticamente as atualizações quando disponíveis
+  backup_before_update:
+    name: Backup Antes de Atualizar
+    description: Criar backup automático antes de aplicar atualizações
+  notify_on_update:
+    name: Notificar Atualizações
+    description: Enviar notificações persistentes sobre atualizações

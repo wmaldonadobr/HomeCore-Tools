@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bashio
+# ==============================================================================
+# Finalização do serviço HCT Daemon
+# ==============================================================================
+
+bashio::log.info "Serviço HCT Daemon finalizado"
