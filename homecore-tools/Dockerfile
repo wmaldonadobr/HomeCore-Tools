@@ -35,6 +35,9 @@ RUN pip3 install --no-cache-dir --break-system-packages \
 # Copiar arquivos do rootfs
 COPY rootfs /
 
+# Copiar run.sh para a raiz
+COPY run.sh /run.sh
+
 # Copiar scripts hc-tools
 COPY tools /tools
 
