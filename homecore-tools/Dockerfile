@@ -13,7 +13,7 @@ LABEL \
     io.hass.type="addon" \
     io.hass.arch="${BUILD_ARCH}"
 
-# Instalar dependências do sistema e pacotes Python via apk
+# Instalar dependências
 RUN apk add --no-cache \
     bash \
     curl \
@@ -27,30 +27,31 @@ RUN apk add --no-cache \
     jq \
     tzdata
 
-# Instalar flask-cors via pip com --break-system-packages (necessário no Alpine 3.19+)
-# Outros pacotes já foram instalados via apk acima
 RUN pip3 install --no-cache-dir --break-system-packages \
     flask-cors
 
-# Copiar arquivos do rootfs
+# Copiar rootfs
 COPY rootfs /
 
-# Copiar run.sh para a raiz
+# Copiar scripts extras
 COPY run.sh /run.sh
-
-# Copiar scripts hc-tools
 COPY tools /tools
 
-# Garantir permissões de execução
+# ✅ Aqui dizemos ao Python onde estão seus módulos HomeCore
+ENV PYTHONPATH="/usr/lib/homecore:${PYTHONPATH}"
+
+# ✅ Criar um launcher limpo para o daemon
+RUN printf '#!/bin/sh\nexec python3 /usr/lib/homecore/hct_daemon.py "$@"\n' > /usr/bin/hct-daemon && \
+    chmod +x /usr/bin/hct-daemon
+
+# Permissões
 RUN chmod a+x /run.sh && \
-    chmod a+x /usr/bin/hct_* && \
     chmod a+x /etc/services.d/hct-daemon/run && \
     chmod a+x /etc/services.d/hct-daemon/finish && \
     chmod a+x /tools/*.sh && \
     chmod a+x /tools/Molsmart/*.sh
 
-# Criar diretórios necessários
+# Diretórios padrão
 RUN mkdir -p /data/logs /data/manifests /data/backups
 
-# Script de inicialização
 CMD ["/run.sh"]
