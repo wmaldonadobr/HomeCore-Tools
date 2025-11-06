@@ -13,7 +13,7 @@ LABEL \
     io.hass.type="addon" \
     io.hass.arch="${BUILD_ARCH}"
 
-# Instalar dependências do sistema
+# Instalar dependências do sistema e pacotes Python via apk
 RUN apk add --no-cache \
     bash \
     curl \
@@ -22,16 +22,15 @@ RUN apk add --no-cache \
     py3-pip \
     py3-aiohttp \
     py3-flask \
+    py3-yaml \
+    py3-requests \
     jq \
     tzdata
 
-# Instalar dependências Python
-RUN pip3 install --no-cache-dir \
-    aiohttp \
-    flask \
-    flask-cors \
-    pyyaml \
-    requests
+# Instalar flask-cors via pip com --break-system-packages (necessário no Alpine 3.19+)
+# Outros pacotes já foram instalados via apk acima
+RUN pip3 install --no-cache-dir --break-system-packages \
+    flask-cors
 
 # Copiar arquivos do rootfs
 COPY rootfs /

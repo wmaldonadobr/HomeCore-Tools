@@ -1,5 +1,5 @@
 name: "HomeCore Tools"
-version: "1.0.0"
+version: "1.0.1"
 slug: homecore-tools
 description: "Ferramentas de manutenção e atualização automática para sistemas HomeCore"
 url: "https://homecore.com.br/docs/addon"
