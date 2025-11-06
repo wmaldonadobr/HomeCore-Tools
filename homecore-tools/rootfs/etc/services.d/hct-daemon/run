@@ -4,4 +4,4 @@
 # ==============================================================================
 
 bashio::log.info "Iniciando serviço HCT Daemon..."
-exec /usr/bin/hct_daemon.py
+exec python3 /usr/bin/hct_daemon.py
