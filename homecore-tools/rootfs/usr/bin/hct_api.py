@@ -540,16 +540,21 @@ def init_api(token: str, updater: HCTUpdater):
     state["updater"] = updater
     logger.info("hct-api", "init", "API inicializada")
 
-
 def run_api(host: str = '0.0.0.0', port: int = 8099):
     """Executa servidor Flask."""
-    # Desabilitar logs do Werkzeug
-    log = logging.getLogger('werkzeug')
-    log.disabled = True
-    
     logger.info("hct-api", "startup", f"Iniciando servidor web em {host}:{port}")
+    
+    # Desabilitar TODOS os logs do Flask/Werkzeug redirecionando stderr
+    # Isso evita que logs contaminem respostas JSON via Ingress
+    import os
+    sys.stderr = open(os.devnull, 'w')
+    
+    # Desabilitar loggers
+    logging.getLogger('werkzeug').disabled = True
+    app.logger.disabled = True
+    
+    # Iniciar servidor silencioso
     app.run(host=host, port=port, debug=False, use_reloader=False)
-
 
 if __name__ == "__main__":
     # Teste standalone
