@@ -43,7 +43,7 @@ COPY tools /tools
 
 # Garantir permissões de execução
 RUN chmod a+x /run.sh && \
-    chmod a+x /usr/bin/hct-* && \
+    chmod a+x /usr/bin/hct_* && \
     chmod a+x /etc/services.d/hct-daemon/run && \
     chmod a+x /etc/services.d/hct-daemon/finish && \
     chmod a+x /tools/*.sh && \
