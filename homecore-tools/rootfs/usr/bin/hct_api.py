@@ -7,6 +7,7 @@ Interface web para monitoramento e controle via Ingress
 import os
 import sys
 import json
+import logging
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template_string
 from flask_cors import CORS
@@ -542,8 +543,12 @@ def init_api(token: str, updater: HCTUpdater):
 
 def run_api(host: str = '0.0.0.0', port: int = 8099):
     """Executa servidor Flask."""
+    # Desabilitar logs do Werkzeug
+    log = logging.getLogger('werkzeug')
+    log.disabled = True
+    
     logger.info("hct-api", "startup", f"Iniciando servidor web em {host}:{port}")
-    app.run(host=host, port=port, debug=False)
+    app.run(host=host, port=port, debug=False, use_reloader=False)
 
 
 if __name__ == "__main__":
