@@ -50,6 +50,6 @@ export HCT_AUTO_UPDATE="${AUTO_UPDATE}"
 export HCT_BACKUP_BEFORE_UPDATE="${BACKUP_BEFORE_UPDATE}"
 export HCT_NOTIFY_ON_UPDATE="${NOTIFY_ON_UPDATE}"
 
-# Iniciar daemon principal
-bashio::log.info "Iniciando HCT Daemon..."
-python3 /usr/bin/hct_daemon.py
+# Daemon é iniciado automaticamente pelo S6 Overlay via services.d/hct-daemon/run
+# Não iniciar aqui para evitar duplicação
+bashio::log.info "Inicialização concluída. Daemon será iniciado pelo S6 Overlay..."
