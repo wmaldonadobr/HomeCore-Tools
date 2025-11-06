@@ -53,3 +53,8 @@ export HCT_NOTIFY_ON_UPDATE="${NOTIFY_ON_UPDATE}"
 # Daemon é iniciado automaticamente pelo S6 Overlay via services.d/hct-daemon/run
 # Não iniciar aqui para evitar duplicação
 bashio::log.info "Inicialização concluída. Daemon será iniciado pelo S6 Overlay..."
+
+# Manter script rodando para não encerrar o add-on
+while true; do
+    sleep 3600
+done
