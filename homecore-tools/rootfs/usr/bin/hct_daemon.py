@@ -10,6 +10,7 @@ import json
 import time
 import asyncio
 import signal
+import threading
 from pathlib import Path
 from typing import Optional
 from urllib.request import Request, urlopen
@@ -19,6 +20,7 @@ from urllib.error import URLError
 sys.path.insert(0, '/usr/bin')
 from hct_logger import get_logger
 from hct_updater import HCTUpdater
+from hct_api import init_api, run_api
 
 logger = get_logger("hct-daemon")
 
@@ -231,6 +233,15 @@ class HCTDaemon:
         # Inicializar updater
         self.updater = HCTUpdater(self.token)
         logger.info("hct-daemon", "startup", "Updater inicializado")
+        
+        # Inicializar e iniciar servidor web (API/Dashboard)
+        logger.info("hct-daemon", "startup", "Iniciando servidor web...")
+        init_api(self.token, self.updater)
+        
+        # Iniciar Flask em thread separada
+        api_thread = threading.Thread(target=run_api, args=('0.0.0.0', 8099), daemon=True)
+        api_thread.start()
+        logger.info("hct-daemon", "startup", "Servidor web iniciado na porta 8099")
         
         # Enviar notificação de inicialização
         self.send_notification(
