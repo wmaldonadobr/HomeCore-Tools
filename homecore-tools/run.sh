@@ -52,4 +52,4 @@ export HCT_NOTIFY_ON_UPDATE="${NOTIFY_ON_UPDATE}"
 
 # Iniciar daemon principal
 bashio::log.info "Iniciando HCT Daemon..."
-exec /usr/bin/hct-daemon.py
+python3 /usr/bin/hct_daemon.py
