@@ -541,20 +541,24 @@ def init_api(token: str, updater: HCTUpdater):
     logger.info("hct-api", "init", "API inicializada")
 
 def run_api(host: str = '0.0.0.0', port: int = 8099):
-    """Executa servidor Flask."""
+    """Executa servidor Flask com wsgiref (silencioso)."""
     logger.info("hct-api", "startup", f"Iniciando servidor web em {host}:{port}")
     
-    # Desabilitar TODOS os logs do Flask/Werkzeug redirecionando stderr
-    # Isso evita que logs contaminem respostas JSON via Ingress
+    # Usar wsgiref ao invés do servidor Flask padrão
+    # wsgiref não imprime logs de inicialização
+    from wsgiref.simple_server import make_server
     import os
+    
+    # Redirecionar stderr para evitar qualquer log
     sys.stderr = open(os.devnull, 'w')
     
-    # Desabilitar loggers
+    # Desabilitar loggers do Flask
     logging.getLogger('werkzeug').disabled = True
     app.logger.disabled = True
     
-    # Iniciar servidor silencioso
-    app.run(host=host, port=port, debug=False, use_reloader=False)
+    # Criar e iniciar servidor wsgiref (100% silencioso)
+    server = make_server(host, port, app)
+    server.serve_forever()
 
 if __name__ == "__main__":
     # Teste standalone
