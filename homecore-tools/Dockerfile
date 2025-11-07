@@ -46,7 +46,6 @@ RUN printf '#!/bin/sh\nexec python3 /usr/lib/homecore/hct_daemon.py "$@"\n' > /u
 
 # Permissões
 RUN chmod a+x /run.sh && \
-    chmod a+x /etc/cont-init.d/10-homecore.sh && \
     chmod a+x /etc/services.d/hct-daemon/run && \
     chmod a+x /etc/services.d/hct-daemon/finish && \
     chmod a+x /tools/*.sh && \
@@ -55,4 +54,4 @@ RUN chmod a+x /run.sh && \
 # Diretórios padrão
 RUN mkdir -p /data/logs /data/manifests /data/backups
 
-CMD ["/init"]
+CMD ["/run.sh"]

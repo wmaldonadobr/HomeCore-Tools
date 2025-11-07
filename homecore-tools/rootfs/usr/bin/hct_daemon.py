@@ -65,7 +65,6 @@ class HCTDaemon:
             url = "http://homeassistant:8123/api/homecore/token"
             request = Request(url)
             request.add_header('Content-Type', 'application/json')
-            request.add_header('Authorization', f'Bearer {self.supervisor_token}')
             
             with urlopen(request, timeout=10) as response:
                 if response.status == 200:
