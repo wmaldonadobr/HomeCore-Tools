@@ -66,4 +66,11 @@ write_env_var "HCT_AUTO_UPDATE" "${HCT_AUTO_UPDATE}"
 write_env_var "HCT_BACKUP_BEFORE_UPDATE" "${HCT_BACKUP_BEFORE_UPDATE}"
 write_env_var "HCT_NOTIFY_ON_UPDATE" "${HCT_NOTIFY_ON_UPDATE}"
 
-bashio::log.info "Inicialização concluída. Variáveis disponíveis para o daemon."
+# Daemon é iniciado automaticamente pelo S6 Overlay via services.d/hct-daemon/run
+bashio::log.info "Inicialização concluída. Aguardando serviços..."
+
+# Manter script rodando para não encerrar o add-on
+while true; do
+    sleep 3600
+done
+
