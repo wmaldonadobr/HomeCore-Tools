@@ -31,117 +31,6 @@ state = {
 }
 
 
-# HTML das Ferramentas IR
-SENDHEX_HTML = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>GW3 • Envio IR (Pronto HEX)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background:#f6f7fb; margin:0; padding:24px; }
-    .wrap { max-width: 960px; margin: 0 auto; background:#fff; border-radius:12px; padding:24px; box-shadow: 0 8px 20px rgba(0,0,0,.06); }
-    .back-link { display: inline-block; margin-bottom: 20px; color: #667eea; text-decoration: none; font-weight: 600; }
-    .back-link:hover { text-decoration: underline; }
-    h1 { font-size: 22px; margin: 0 0 18px; color:#0f172a; }
-    .grid { display:grid; grid-template-columns: repeat(3, 1fr); gap:14px; }
-    .full { grid-column: 1 / -1; }
-    label { font-size: 13px; color:#334155; margin-bottom:6px; display:block; }
-    input[type="text"], textarea { width:100%; box-sizing:border-box; border:1px solid #cbd5e1; border-radius:8px; padding:10px 12px; font-size:14px; outline:none; transition: box-shadow .2s, border-color .2s; }
-    input:focus, textarea:focus { border-color:#667eea; box-shadow: 0 0 0 3px rgba(102,126,234,.15); }
-    textarea { min-height: 160px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    .row { display:flex; gap:10px; align-items:center; }
-    .btn { background:#667eea; color:#fff; border:0; border-radius:10px; padding:12px 18px; font-weight:600; cursor:pointer; font-size:14px; }
-    .btn.secondary { background:#475569; }
-    .btn.warn { background:#dc2626; }
-    .btn:disabled { opacity:.6; cursor:not-allowed; }
-    .status { margin-top:14px; padding:12px; border-radius:8px; display:none; white-space:pre-wrap; }
-    .ok { background:#dcfce7; color:#166534; display:block; }
-    .err { background:#fee2e2; color:#991b1b; display:block; }
-    .hint { color:#475569; font-size:12px; margin-top:6px; }
-    .checkbox { display:flex; align-items:center; gap:8px; }
-  </style>
-</head>
-<body>
-  <div class="wrap">
-    <a href="/" class="back-link">← Voltar ao Dashboard</a>
-    <h1>GW3 • Envio de Códigos IR (POST • x-www-form-urlencoded)</h1>
-    <div class="grid">
-      <div><label for="ip">IP do GW3</label><input id="ip" type="text" placeholder="192.168.1.112" autocomplete="off"></div>
-      <div><label for="serial">Serial (serialNum)</label><input id="serial" type="text" placeholder="P130-C101-A0794" autocomplete="off"></div>
-      <div><label for="pwd">Senha (verifyCode)</label><input id="pwd" type="text" placeholder="72856898" autocomplete="off"></div>
-      <div><label for="c">Parâmetro c</label><input id="c" type="text" placeholder="1" autocomplete="off"></div>
-      <div><label for="r">Parâmetro r</label><input id="r" type="text" placeholder="2" autocomplete="off"></div>
-      <div class="checkbox"><input id="upper" type="checkbox"><label for="upper">HEX em maiúsculas</label></div>
-      <div class="full"><label for="pronto">Código Pronto HEX (com espaços)</label><textarea id="pronto" placeholder="Ex.: 0000 006D 0022 0002 0157 00AC 0015 0016 0015 0041 ..."></textarea><div class="hint">Cole exatamente com espaços; o formulário codifica automaticamente. Todos os campos são salvos no seu navegador (localStorage).</div></div>
-      <div class="full row"><button class="btn" id="send">📡 Enviar (POST)</button><button class="btn secondary" id="preview">🧪 Pré-visualizar corpo</button><button class="btn warn" id="clear">🧹 Limpar dados salvos</button></div>
-    </div>
-    <div id="status" class="status"></div>
-  </div>
-  <script>
-    const F={ip:document.getElementById('ip'),serial:document.getElementById('serial'),pwd:document.getElementById('pwd'),c:document.getElementById('c'),r:document.getElementById('r'),upper:document.getElementById('upper'),pronto:document.getElementById('pronto'),status:document.getElementById('status'),send:document.getElementById('send'),preview:document.getElementById('preview'),clear:document.getElementById('clear')};
-    const KEYS={ip:'gw3_ip',serial:'gw3_serial',pwd:'gw3_pwd',c:'gw3_c',r:'gw3_r',pronto:'gw3_pronto',upper:'gw3_upper'};
-    function load(){F.ip.value=localStorage.getItem(KEYS.ip)||'192.168.1.112';F.serial.value=localStorage.getItem(KEYS.serial)||'P130-C101-A0794';F.pwd.value=localStorage.getItem(KEYS.pwd)||'72856898';F.c.value=localStorage.getItem(KEYS.c)||'1';F.r.value=localStorage.getItem(KEYS.r)||'2';F.pronto.value=localStorage.getItem(KEYS.pronto)||'';F.upper.checked=(localStorage.getItem(KEYS.upper)||'0')==='1';}
-    function bindAutosave(){const saveText=(el,key)=>el.addEventListener('input',()=>localStorage.setItem(key,el.value));const saveCheck=(el,key)=>el.addEventListener('change',()=>localStorage.setItem(key,el.checked?'1':'0'));saveText(F.ip,KEYS.ip);saveText(F.serial,KEYS.serial);saveText(F.pwd,KEYS.pwd);saveText(F.c,KEYS.c);saveText(F.r,KEYS.r);saveText(F.pronto,KEYS.pronto);saveCheck(F.upper,KEYS.upper);}
-    function normalizeHex(s){let v=s.replace(/\\s+/g,' ').trim();if(F.upper.checked)v=v.toUpperCase();return v;}
-    function build(){const ip=F.ip.value.trim();const serial=F.serial.value.trim();const pwd=F.pwd.value.trim();const c=F.c.value.trim();const r=F.r.value.trim();let pronto=normalizeHex(F.pronto.value);if(!ip||!serial||!pwd||!c||!r||!pronto){throw new Error('Preencha IP, serial, senha, c, r e o código Pronto HEX.');}const url=`http://${ip}/api/device/deviceDetails/smartHomeAutoHttpControl`;const body=new URLSearchParams();body.append('serialNum',serial);body.append('verifyCode',pwd);body.append('pronto',pronto);body.append('c',c);body.append('r',r);return{url,body};}
-    function showOK(msg){F.status.className='status ok';F.status.textContent=msg;}function showERR(msg){F.status.className='status err';F.status.textContent=msg;}
-    async function send(){try{const{url,body}=build();await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body,mode:'no-cors'});showOK('✅ Enviado! (POST x-www-form-urlencoded com pronto=...)');}catch(e){showERR('❌ '+e.message);}}
-    function preview(){try{const{url,body}=build();showOK(`URL:\\n${url}\\n\\nBody:\\n${body.toString()}`);}catch(e){showERR('❌ '+e.message);}}
-    function clearAll(){Object.values(KEYS).forEach(k=>localStorage.removeItem(k));load();showOK('🧹 Dados salvos apagados.');}
-    document.addEventListener('DOMContentLoaded',()=>{load();bindAutosave();F.send.addEventListener('click',send);F.preview.addEventListener('click',preview);F.clear.addEventListener('click',clearAll);});
-  </script>
-</body>
-</html>
-"""
-
-SENDIR_HTML = """<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8"><title>Ferramenta de Envio de Comandos IR - SendIR / GC</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body{font-family:'Roboto',sans-serif;background-color:#f6f7fb;color:#333;margin:0;padding:24px;display:flex;justify-content:center;align-items:center;min-height:100vh;}
-        .container{width:100%;max-width:900px;background:#fff;padding:2em;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06);}
-        .back-link{display:inline-block;margin-bottom:20px;color:#667eea;text-decoration:none;font-weight:600;}.back-link:hover{text-decoration:underline;}
-        h1{font-size:1.8em;color:#1e3a8a;margin-top:0;margin-bottom:1em;text-align:center;}
-        .form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.5em;}
-        .form-group{display:flex;flex-direction:column;}.full-width{grid-column:1/-1;}
-        label{font-weight:500;margin-bottom:0.5em;color:#374151;}
-        input,textarea{padding:10px;border:1px solid #cbd5e1;border-radius:8px;font-family:'Roboto',sans-serif;font-size:1em;transition:border-color 0.3s,box-shadow 0.3s;}
-        input:focus,textarea:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.2);outline:none;}
-        textarea{height:120px;resize:vertical;font-family:'Courier New',Courier,monospace;}
-        .button-container{grid-column:1/-1;display:flex;justify-content:center;margin-top:1em;}
-        button{background-color:#667eea;color:white;padding:12px 25px;border:none;border-radius:10px;cursor:pointer;font-size:1.1em;font-weight:600;transition:background-color 0.3s;}button:hover{background-color:#5568d3;}
-        #status-message{margin-top:1.5em;padding:1em;border-radius:8px;text-align:center;font-weight:500;display:none;}
-        .status-success{background-color:#dcfce7;color:#166534;display:block;}.status-error{background-color:#fee2e2;color:#991b1b;display:block;}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="/" class="back-link">← Voltar ao Dashboard</a>
-        <h1>Ferramenta de Envio de Comandos IR (SendIR / GC)</h1>
-        <div class="form-grid">
-            <div class="form-group"><label for="ip">IP do Dispositivo:</label><input type="text" id="ip"></div>
-            <div class="form-group"><label for="serial">Serial Number:</label><input type="text" id="serial"></div>
-            <div class="form-group"><label for="pwd">Password (verifyCode):</label><input type="text" id="pwd"></div>
-            <div class="form-group full-width"><label for="c-value">Parâmetro 'c':</label><input type="text" id="c-value"></div>
-            <div class="form-group full-width"><label for="gc-code">Código SendIR / GC:</label><textarea id="gc-code" placeholder="Cole o código SendIR aqui (ex: 38000,1,1,...)"></textarea></div>
-            <div class="button-container"><button id="send-button">📡 Enviar Comando</button></div>
-        </div>
-        <div id="status-message"></div>
-    </div>
-    <script>
-        const ipEl=document.getElementById('ip');const serialEl=document.getElementById('serial');const pwdEl=document.getElementById('pwd');const cEl=document.getElementById('c-value');const gcCodeEl=document.getElementById('gc-code');const sendButton=document.getElementById('send-button');const statusMessageEl=document.getElementById('status-message');
-        function loadData(){ipEl.value=localStorage.getItem('sendir_ip')||'192.168.1.112';serialEl.value=localStorage.getItem('sendir_serial')||'P130-C101-A0794';pwdEl.value=localStorage.getItem('sendir_pwd')||'72856898';cEl.value=localStorage.getItem('sendir_c')||'1';gcCodeEl.value=localStorage.getItem('sendir_gc_code')||'';}
-        function saveData(){localStorage.setItem('sendir_ip',ipEl.value);localStorage.setItem('sendir_serial',serialEl.value);localStorage.setItem('sendir_pwd',pwdEl.value);localStorage.setItem('sendir_c',cEl.value);localStorage.setItem('sendir_gc_code',gcCodeEl.value);}
-        async function sendRequest(){saveData();const ip=ipEl.value.trim();const serial=serialEl.value.trim();const pwd=pwdEl.value.trim();const c=cEl.value.trim();const gcCode=gcCodeEl.value.trim().replace(/\\s/g,'');if(!ip||!serial||!pwd||!c||!gcCode){statusMessageEl.textContent='❌ Erro: Todos os campos devem ser preenchidos.';statusMessageEl.className='status-error';return;}const url=`http://${ip}/api/device/deviceDetails/smartHomeAutoHttpControl`;const body=new URLSearchParams();body.append('serialNum',serial);body.append('verifyCode',pwd);body.append('c',c);body.append('gc',gcCode);statusMessageEl.style.display='none';statusMessageEl.className='';try{await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded',},body:body,mode:'no-cors'});statusMessageEl.textContent='✅ Comando enviado com sucesso para o dispositivo!';statusMessageEl.className='status-success';}catch(error){statusMessageEl.textContent=`❌ Erro ao enviar o comando. Verifique o IP e a conexão de rede. Detalhe: ${error.message}`;statusMessageEl.className='status-error';}}
-        sendButton.addEventListener('click',sendRequest);document.addEventListener('DOMContentLoaded',loadData);
-    </script>
-</body>
-</html>
-"""
-
 # HTML do Dashboard
 DASHBOARD_HTML = """
 <!DOCTYPE html>
@@ -382,14 +271,6 @@ DASHBOARD_HTML = """
         </div>
         
         <div class="card">
-            <h2>🔧 Ferramentas IR</h2>
-            <div class="btn-group">
-                <a href="/tools/sendhex" class="btn">📡 Enviar IR (Pronto HEX)</a>
-                <a href="/tools/sendir" class="btn">📻 Enviar IR (SendIR/GC)</a>
-            </div>
-        </div>
-        
-        <div class="card">
             <h2>📝 Logs Recentes</h2>
             <div id="logs-container">
                 <div class="loading">
@@ -563,18 +444,6 @@ def dashboard():
     return render_template_string(DASHBOARD_HTML)
 
 
-@app.route('/tools/sendhex')
-def tool_sendhex():
-    """Ferramenta de envio IR (Pronto HEX)."""
-    return render_template_string(SENDHEX_HTML)
-
-
-@app.route('/tools/sendir')
-def tool_sendir():
-    """Ferramenta de envio IR (SendIR/GC)."""
-    return render_template_string(SENDIR_HTML)
-
-
 @app.route('/api/status')
 def api_status():
     """Retorna status atual do sistema."""
@@ -671,17 +540,25 @@ def init_api(token: str, updater: HCTUpdater):
     state["updater"] = updater
     logger.info("hct-api", "init", "API inicializada")
 
-
 def run_api(host: str = '0.0.0.0', port: int = 8099):
-    """Executa servidor Flask."""
-    # Desabilitar logs do Werkzeug (servidor Flask) para não contaminar JSON
-    log = logging.getLogger('werkzeug')
-    log.setLevel(logging.ERROR)
-    log.disabled = True
-    
+    """Executa servidor Flask com wsgiref (silencioso)."""
     logger.info("hct-api", "startup", f"Iniciando servidor web em {host}:{port}")
-    app.run(host=host, port=port, debug=False, use_reloader=False)
-
+    
+    # Usar wsgiref ao invés do servidor Flask padrão
+    # wsgiref não imprime logs de inicialização
+    from wsgiref.simple_server import make_server
+    import os
+    
+    # Redirecionar stderr para evitar qualquer log
+    sys.stderr = open(os.devnull, 'w')
+    
+    # Desabilitar loggers do Flask
+    logging.getLogger('werkzeug').disabled = True
+    app.logger.disabled = True
+    
+    # Criar e iniciar servidor wsgiref (100% silencioso)
+    server = make_server(host, port, app)
+    server.serve_forever()
 
 if __name__ == "__main__":
     # Teste standalone
