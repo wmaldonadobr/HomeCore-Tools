@@ -19,24 +19,31 @@ class HCTLogger:
     def __init__(self, name: str = "hct", log_dir: str = "/data/logs"):
         self.name = name
         self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
         
         # Configurar logger Python padrão
         self.logger = logging.getLogger(name)
         self.logger.setLevel(self._get_log_level())
         
-        # Handler para arquivo JSON
-        json_log_file = self.log_dir / f"{name}.json.log"
-        json_handler = RotatingFileHandler(
-            json_log_file,
-            maxBytes=10 * 1024 * 1024,  # 10 MB
-            backupCount=5
-        )
-        json_handler.setFormatter(logging.Formatter('%(message)s'))
-        self.logger.addHandler(json_handler)
+        # Tentar criar diretório e adicionar handler de arquivo
+        # Se falhar, apenas usar console
+        try:
+            self.log_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Handler para arquivo JSON
+            json_log_file = self.log_dir / f"{name}.json.log"
+            json_handler = RotatingFileHandler(
+                json_log_file,
+                maxBytes=10 * 1024 * 1024,  # 10 MB
+                backupCount=5
+            )
+            json_handler.setFormatter(logging.Formatter('%(message)s'))
+            self.logger.addHandler(json_handler)
+        except (PermissionError, OSError) as e:
+            # Se não conseguir criar arquivo de log, apenas usar console
+            print(f"[WARNING] Não foi possível criar arquivo de log: {e}", file=sys.stderr)
         
-        # Handler para console (compatível com HA)
-        console_handler = logging.StreamHandler()
+        # Handler para console (compatível com HA) - sempre adicionar
+        console_handler = logging.StreamHandler(sys.stderr)
         console_handler.setFormatter(
             logging.Formatter('[%(levelname)s] %(message)s')
         )

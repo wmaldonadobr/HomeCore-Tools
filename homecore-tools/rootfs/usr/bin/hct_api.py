@@ -10,7 +10,6 @@ import json
 import logging
 from pathlib import Path
 from flask import Flask, jsonify, request, render_template_string
-from flask_cors import CORS
 
 # Importar módulos HCT
 sys.path.insert(0, '/usr/bin')
@@ -20,7 +19,6 @@ from hct_updater import HCTUpdater
 logger = get_logger("hct-api")
 
 app = Flask(__name__)
-CORS(app)
 
 # Estado global
 state = {
